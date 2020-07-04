@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from bs4 import BeautifulSoup
 from multiprocessing import Pool
-# from PIL import Image
+from pathlib import Path
 from time import time, sleep
 from tqdm import tqdm
 
@@ -94,24 +94,27 @@ def load_single_kanji(page_url: str, show_image=False):
         
 if __name__ == "__main__":
     
-#     # load list with all kanjis
-#     print("Load pages list...")
-#     page_list = get_page_list()
+    # load list with all kanjis
+    print("Load pages list...")
+    page_list = get_page_list()
     
-#     print("Load names of all pages with kanjis...")
-#     t0 = time()
-#     with Pool(7) as p:
-#         kanji_page_list = list(tqdm(p.imap_unordered(get_kanji_page_list, page_list), total=len(page_list)))
-#     print(f"Finished, runtime = {round((time()-t0)/60.0, 1)} minutes")
+    print("Load names of all pages with kanjis...")
+    t0 = time()
+    with Pool(7) as p:
+        kanji_page_list = list(tqdm(p.imap_unordered(get_kanji_page_list, page_list), total=len(page_list)))
+    print(f"Finished, runtime = {round((time()-t0)/60.0, 1)} minutes")
 
-#     print("Save and reload URL list")
-#     with open("support_data/kanji_url_list.p", "wb") as f:
-#         pickle.dump(kanji_page_list, f)
+    print("Save and reload URL list")
+    Path('support_data').mkdir(parents=True, exist_ok=True)
+    with open("support_data/kanji_url_list.p", "wb") as f:
+        pickle.dump(kanji_page_list, f)
     
     with open("support_data/kanji_url_list.p", "rb") as f:
         kanji_page_list = pickle.load(f)
     
     # Download all kanjis
+    Path('kanjis').mkdir(parents=True, exist_ok=True)
+
     print("Downloading all kanjis...")
     t0 = time()
     with Pool(10) as p:
