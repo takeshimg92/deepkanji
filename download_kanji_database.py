@@ -45,7 +45,7 @@ def get_kanji_page_list(page_list: list):
     print(f"Kanji page list found with {len(kanji_list)} entries")
     return kanji_list
 
-def load_single_kanji(page_url: str, show_image=False):
+def load_single_kanji(page_url: str):
     """
     Page should point to a single kanji"s page, 
     eg. https://www.unicode.org/cgi-bin/GetUnihanData.pl?codepoint=3463&useutf8=true
@@ -67,6 +67,12 @@ def load_single_kanji(page_url: str, show_image=False):
     except AttributeError:
         print(f"{page_url}: page structure doesn't follow standard. Cancelling.")
         return 0
+    except TypeError:
+        print(f"{page_url}: TypeError identified, probably None appearing. Cancelling.")
+        return 0
+    except:
+        print(f"{page_url}: unidentified error")
+        return 0
     
     # create file to save: use original name + random string
     filename_jpg = os.path.join("kanjis",
@@ -79,16 +85,6 @@ def load_single_kanji(page_url: str, show_image=False):
     except:
         print(f"{page_url}: link to image found, but could not download. Cancelling.")
         return 0
-    
-    # show image
-    if show_image:
-    #     Image.open(filename_jpg).show()
-        img = mpimg.imread(filename_jpg)
-        imgplot = plt.imshow(img)
-        plt.show()
-        
-    # sleep to avoid excess calls
-#     sleep(1)
     
     return 1
         
@@ -118,6 +114,9 @@ if __name__ == "__main__":
     print("Downloading all kanjis...")
     t0 = time()
     with Pool(10) as p:
-        list(tqdm(p.imap_unordered(load_single_kanji, kanji_page_list), total=len(kanji_page_list)))
-    print(f"Download finished, runtime = {round((time()-t0)/60.0)} minutes")
+        results_list = list(tqdm(p.imap_unordered(load_single_kanji, kanji_page_list), total=len(kanji_page_list)))
+    
+    print(f"Download finished, runtime = {round((time()-t0)/(3600.0))} hours")
+    fails = len([x for x in results_list if x == 0])
+    print(f"{fails} failures out of {len(kanji_page_list)} trials")
     

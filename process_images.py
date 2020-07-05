@@ -4,12 +4,19 @@ import PIL
 import glob
 from pathlib import Path
 from tqdm import tqdm
+import zipfile
 
 ## Parameters
 
 BOX = (1,10,23,34)   # cropping box parameters
 OLD_FOLDER = 'kanjis'
 NEW_FOLDER = 'kanjis_edited'
+
+def zipdir(path, ziph):
+    # ziph is zipfile handle
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            ziph.write(os.path.join(root, file))
 
 if __name__ == '__main__':
     print(f"Converting files, cropping, removing alpha channel and pasting to {NEW_FOLDER}")
@@ -33,3 +40,7 @@ if __name__ == '__main__':
             i += 1
 
     print(f"Out of {len(file_list)} files, could not read {i}")
+    
+    print("Zipping and saving to processed_images.zip")
+    with zipfile.ZipFile('processed_images.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
+        zipdir(os.path.join('.', NEW_FOLDER), zipf)
