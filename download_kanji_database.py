@@ -1,6 +1,7 @@
 import string
 import random
 import os
+import glob
 import pickle
 import urllib.request as url
 import matplotlib.pyplot as plt
@@ -30,8 +31,8 @@ def get_page_list():
 
 
 def get_kanji_page_list(page_list: list):
+    # TODO: make this function work page by page, so you can multiprocess and flatten later
     kanji_list = []
-
     for page_url in tqdm(page_list):
         page = url.urlopen(page_url).read()
         bs = BeautifulSoup(page)
@@ -99,8 +100,7 @@ if __name__ == "__main__":
 
         print("Load names of all pages with kanjis...")
         t0 = time()
-        with Pool(7) as p:
-            kanji_page_list = list(tqdm(p.imap_unordered(get_kanji_page_list, page_list), total=len(page_list)))
+        kanji_page_list = get_kanji_page_list(page_list)
         print(f"Finished, runtime = {round((time()-t0)/60.0, 1)} minutes")
 
         print("Save and reload URL list")
