@@ -44,6 +44,9 @@ if __name__ == '__main__':
     print(f"Converting files, cropping, removing alpha channel and pasting to {NEW_FOLDER}")
     
     Path(NEW_FOLDER).mkdir(parents=True, exist_ok=True)
+    print("Clearing kanjis folder...")
+    for f in tqdm(glob.glob(os.path.join(NEW_FOLDER, '*.jpg'))):
+        os.remove(f)
 
     file_list = glob.glob(os.path.join(OLD_FOLDER, '*.jpg'))
     print(len(file_list))
