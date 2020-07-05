@@ -90,33 +90,41 @@ def load_single_kanji(page_url: str):
         
 if __name__ == "__main__":
     
-    # load list with all kanjis
-    print("Load pages list...")
-    page_list = get_page_list()
+    proceed = input("This will delete all previously downloads. Do you wish to continue? [y/n]")
+    if proceed not in ['n', 'no', 'N']:
     
-    print("Load names of all pages with kanjis...")
-    t0 = time()
-    with Pool(7) as p:
-        kanji_page_list = list(tqdm(p.imap_unordered(get_kanji_page_list, page_list), total=len(page_list)))
-    print(f"Finished, runtime = {round((time()-t0)/60.0, 1)} minutes")
+        # load list with all kanjis
+        print("Load pages list...")
+        page_list = get_page_list()
 
-    print("Save and reload URL list")
-    Path('support_data').mkdir(parents=True, exist_ok=True)
-    with open("support_data/kanji_url_list.p", "wb") as f:
-        pickle.dump(kanji_page_list, f)
-    
-    with open("support_data/kanji_url_list.p", "rb") as f:
-        kanji_page_list = pickle.load(f)
-    
-    # Download all kanjis
-    Path('kanjis').mkdir(parents=True, exist_ok=True)
+        print("Load names of all pages with kanjis...")
+        t0 = time()
+        with Pool(7) as p:
+            kanji_page_list = list(tqdm(p.imap_unordered(get_kanji_page_list, page_list), total=len(page_list)))
+        print(f"Finished, runtime = {round((time()-t0)/60.0, 1)} minutes")
 
-    print("Downloading all kanjis...")
-    t0 = time()
-    with Pool(10) as p:
-        results_list = list(tqdm(p.imap_unordered(load_single_kanji, kanji_page_list), total=len(kanji_page_list)))
-    
-    print(f"Download finished, runtime = {round((time()-t0)/(3600.0))} hours")
-    fails = len([x for x in results_list if x == 0])
-    print(f"{fails} failures out of {len(kanji_page_list)} trials")
-    
+        print("Save and reload URL list")
+        Path('support_data').mkdir(parents=True, exist_ok=True)
+        with open("support_data/kanji_url_list.p", "wb") as f:
+            pickle.dump(kanji_page_list, f)
+
+        with open("support_data/kanji_url_list.p", "rb") as f:
+            kanji_page_list = pickle.load(f)
+
+        # Download all kanjis
+        Path('kanjis').mkdir(parents=True, exist_ok=True)
+        print("Clearing kanjis folder...")
+        for f in tqdm(glob.glob('kanjis/*')):
+            os.remove(f)
+
+        print("Downloading all kanjis...")
+        t0 = time()
+        with Pool(10) as p:
+            results_list = list(tqdm(p.imap_unordered(load_single_kanji, kanji_page_list), total=len(kanji_page_list)))
+
+        print(f"Download finished, runtime = {round((time()-t0)/(3600.0))} hours")
+        fails = len([x for x in results_list if x == 0])
+        print(f"{fails} failures out of {len(kanji_page_list)} trials")
+    else:
+        print("Terminating now")
+        pass
